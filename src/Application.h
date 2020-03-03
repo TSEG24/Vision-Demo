@@ -20,6 +20,7 @@ public:
 
 private:
     void getImage();
+    void render(std::vector<DetectedCard> cards);
 
     bool useCamera;
     std::string inputImage, outputFile;

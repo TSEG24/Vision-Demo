@@ -30,18 +30,9 @@ Application::~Application() {
 void Application::run() {
     while (true) {
         getImage();
-        renderedFrame = frame.clone();
 
         std::vector<DetectedCard> cards = detector.findCards(frame.clone());
-
-        for (DetectedCard card : cards) {
-            cv::rectangle(renderedFrame, card.outline, cv::Scalar(0, 0, 255));
-        }
-
-        if (frame.cols > 1000) {
-            cv::resize(renderedFrame, renderedFrame, cv::Size(), 0.5, 0.5);
-        }
-        cv::imshow("Output", renderedFrame);
+        render(cards);
 
         if (cv::waitKey(30) >= 0) break;
     }
@@ -59,4 +50,17 @@ void Application::getImage() {
         std::cout << "Reading input file" << std::endl;
         frame = cv::imread(inputImage);
     }
+}
+
+void Application::render(std::vector<DetectedCard> cards) {
+    renderedFrame = frame.clone();
+
+    for (DetectedCard card : cards) {
+        cv::rectangle(renderedFrame, card.outline, cv::Scalar(0, 0, 255));
+    }
+
+    if (frame.cols > 1000) {
+        cv::resize(renderedFrame, renderedFrame, cv::Size(), 0.5, 0.5);
+    }
+    cv::imshow("Output", renderedFrame);
 }
