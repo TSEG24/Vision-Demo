@@ -3,7 +3,7 @@
 //
 #include "Application.h"
 
-Application::Application(bool useCamera, std::string outputFile) : camera(0) {
+Application::Application(bool useCamera, std::string outputFile) : camera(2) {
     this->useCamera = useCamera;
     this->outputFile = std::move(outputFile);
     output.open(this->outputFile);
@@ -30,8 +30,18 @@ Application::~Application() {
 void Application::run() {
     while (true) {
         getImage();
+        renderedFrame = frame.clone();
 
-        cv::imshow("Output", frame);
+        std::vector<DetectedCard> cards = detector.findCards(frame.clone());
+
+        for (DetectedCard card : cards) {
+            cv::rectangle(renderedFrame, card.outline, cv::Scalar(0, 0, 255));
+        }
+
+        if (frame.cols > 1000) {
+            cv::resize(renderedFrame, renderedFrame, cv::Size(), 0.5, 0.5);
+        }
+        cv::imshow("Output", renderedFrame);
 
         if (cv::waitKey(30) >= 0) break;
     }

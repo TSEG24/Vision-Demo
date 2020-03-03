@@ -8,6 +8,8 @@
 #include <opencv.h>
 #include <iostream>
 
+#include "Detector.h"
+
 class Application {
 public:
     Application(bool useCamera, std::string outputFile);
@@ -22,8 +24,10 @@ private:
     bool useCamera;
     std::string inputImage, outputFile;
 
-    cv::Mat frame;
+    cv::Mat frame, renderedFrame;
     cv::VideoCapture camera;
 
     std::fstream output;
+
+    Detector detector;
 };
