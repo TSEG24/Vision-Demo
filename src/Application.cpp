@@ -3,12 +3,11 @@
 //
 #include "Application.h"
 
-Application::Application(bool useCamera, std::string outputFile) : camera(2) {
+Application::Application(bool useCamera, std::string outputFile) : camera(0) {
     this->useCamera = useCamera;
     this->outputFile = std::move(outputFile);
-    output.open(this->outputFile);
 
-    std::memset(previousGrid, -1, sizeof previousGrid);
+    std::memset(nextGrid, -1, sizeof nextGrid);
 }
 
 Application::Application(bool useCamera, std::string outputFile, std::string inputImage) {
@@ -22,13 +21,8 @@ Application::Application(bool useCamera, std::string outputFile, std::string inp
     this->useCamera = useCamera;
     this->outputFile = std::move(outputFile);
     this->inputImage = std::move(inputImage);
-    output.open(this->outputFile);
 
-    std::memset(previousGrid, -1, sizeof previousGrid);
-}
-
-Application::~Application() {
-    output.close();
+    std::memset(nextGrid, -1, sizeof nextGrid);
 }
 
 void Application::run() {
@@ -40,6 +34,7 @@ void Application::run() {
         getImage();
 
         std::vector<DetectedCard> cards = detector.findCards(frame.clone());
+        writeToFile(cards);
         render(cards);
 
         if (cv::waitKey(30) >= 0) break;
@@ -65,11 +60,42 @@ void Application::render(std::vector<DetectedCard> cards) {
 
     for (DetectedCard card : cards) {
         cv::rectangle(renderedFrame, card.outline, cv::Scalar(0, 0, 255));
-        std::cout << card.colour << " " << card.gridLocation.x << ", " << card.gridLocation.y << std::endl;
     }
 
+    // make the image smaller when displaying if it is large, wont affect any detection or output
     if (frame.cols > 1000) {
         cv::resize(renderedFrame, renderedFrame, cv::Size(), 0.5, 0.5);
     }
     cv::imshow("Output", renderedFrame);
+}
+
+void Application::writeToFile(std::vector<DetectedCard> cards) {
+    bool shouldRightToFile = false;
+    std::string outputText = "";
+
+    for (size_t i = 0; i < cards.size(); i++) {
+        int x = cards[i].gridLocation.x;
+        int y = cards[i].gridLocation.y;
+
+        if (cardGrid[x][y] != i) {
+            nextGrid[x][y] = i;
+            shouldRightToFile = true;
+        }
+
+        outputText += std::to_string(x) + "," + std::to_string(y) + "," + cards[i].colour + "\n";
+    }
+
+    std::copy(&nextGrid[0][0], &nextGrid[0][0] + 3 * 3, &cardGrid[0][0]);
+
+    if (shouldRightToFile) {
+        if (!output) {
+            std::cerr << "File could not be opened: " << std::strerror(errno) << std::endl;
+            return;
+        }
+
+        std::cout << "writing to file" << std::endl;
+        output.open(this->outputFile, std::ofstream::out | std::ofstream::trunc);
+        output << outputText;
+        output.close();
+    }
 }

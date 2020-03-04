@@ -14,7 +14,6 @@ class Application {
 public:
     Application(bool useCamera, std::string outputFile);
     Application(bool useCamera, std::string outputFile, std::string inputImage);
-    ~Application();
 
     void run();
 
@@ -22,15 +21,17 @@ private:
     void getImage();
     void render(std::vector<DetectedCard> cards);
 
+    void writeToFile(std::vector<DetectedCard> cards);
+
     bool useCamera;
     std::string inputImage, outputFile;
 
     cv::Mat frame, renderedFrame;
     cv::VideoCapture camera;
 
-    std::fstream output;
+    std::ofstream output;
 
     Detector detector;
 
-    int cardGrid[3][3], previousGrid[3][3];
+    int cardGrid[3][3], nextGrid[3][3];
 };
