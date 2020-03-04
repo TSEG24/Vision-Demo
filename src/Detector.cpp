@@ -31,13 +31,23 @@ std::vector<DetectedCard> Detector::findCards(cv::Mat image) {
 }
 
 DetectedCard Detector::addCardData(cv::Rect roi, cv::Mat image) {
+    cv::Point2i location(
+        roi.tl().x + (roi.width / 2),
+        roi.br().y - (roi.height / 2)
+    );
+
+    // This value is hard coded but will be variable in final project or
+    // at min adjusted to be bigger
+    constexpr int gridSize = 3;
+
     return {
-            cv::Point2i(
-                    roi.tl().x + (roi.width / 2),
-                    roi.br().y - (roi.height / 2)
-            ),
+            location,
             roi,
             detectCardColour(roi, image),
+            {
+                location.x / (image.cols / gridSize),
+                location.y / (image.rows / gridSize)
+            }
     };
 }
 

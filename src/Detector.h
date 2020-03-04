@@ -10,6 +10,9 @@ struct DetectedCard {
     cv::Point2f coords;
     cv::Rect outline;
     std::string colour;
+    struct {
+        int x, y;
+    } gridLocation;
 };
 
 class Detector {

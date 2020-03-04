@@ -31,4 +31,6 @@ private:
     std::fstream output;
 
     Detector detector;
+
+    int cardGrid[3][3], previousGrid[3][3];
 };

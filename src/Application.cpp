@@ -7,6 +7,8 @@ Application::Application(bool useCamera, std::string outputFile) : camera(2) {
     this->useCamera = useCamera;
     this->outputFile = std::move(outputFile);
     output.open(this->outputFile);
+
+    std::memset(previousGrid, -1, sizeof previousGrid);
 }
 
 Application::Application(bool useCamera, std::string outputFile, std::string inputImage) {
@@ -21,6 +23,8 @@ Application::Application(bool useCamera, std::string outputFile, std::string inp
     this->outputFile = std::move(outputFile);
     this->inputImage = std::move(inputImage);
     output.open(this->outputFile);
+
+    std::memset(previousGrid, -1, sizeof previousGrid);
 }
 
 Application::~Application() {
@@ -29,6 +33,10 @@ Application::~Application() {
 
 void Application::run() {
     while (true) {
+        // set every index in cardGrid to -1 so we know it is not pointing to a valid
+        // array index when we save the detected cards to the text file
+        std::memset(cardGrid, -1, sizeof cardGrid);
+
         getImage();
 
         std::vector<DetectedCard> cards = detector.findCards(frame.clone());
@@ -57,6 +65,7 @@ void Application::render(std::vector<DetectedCard> cards) {
 
     for (DetectedCard card : cards) {
         cv::rectangle(renderedFrame, card.outline, cv::Scalar(0, 0, 255));
+        std::cout << card.colour << " " << card.gridLocation.x << ", " << card.gridLocation.y << std::endl;
     }
 
     if (frame.cols > 1000) {
