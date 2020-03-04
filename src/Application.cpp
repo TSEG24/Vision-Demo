@@ -82,7 +82,7 @@ void Application::writeToFile(std::vector<DetectedCard> cards) {
             shouldRightToFile = true;
         }
 
-        outputText += std::to_string(x) + "," + std::to_string(y) + "," + cards[i].colour + "\n";
+        outputText += cards[i].colour + "," + std::to_string(x) + "," + std::to_string(y) + "\n";
     }
 
     std::copy(&nextGrid[0][0], &nextGrid[0][0] + 3 * 3, &cardGrid[0][0]);
